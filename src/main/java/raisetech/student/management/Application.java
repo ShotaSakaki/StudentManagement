@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class Application {
 
 	@Autowired
-	private StudentRepository repository;
+	private StudentRepository studentRepository;
+	private StudentRepository studentsCoursesRepository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
@@ -20,7 +21,12 @@ public class Application {
 
 	@GetMapping("/studentList")
 	public List<Student> getStudentList(){
-		return repository.search();
+		return studentRepository.searchStudents();
+	}
+
+	@GetMapping("/studentsCoursesList")
+	public List<StudentsCourses> getStudentsCoursesList(){
+		return studentRepository.searchStudentsCourses();
 	}
 }
 

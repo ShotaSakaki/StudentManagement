@@ -7,5 +7,7 @@ import org.apache.ibatis.annotations.Select;
 @Mapper
 public interface StudentRepository {
   @Select("SELECT * FROM students")
-  List<Student> search();
+  List<Student> searchStudents();
+  @Select("SELECT * FROM students_courses")
+  List<StudentsCourses> searchStudentsCourses();
 }
