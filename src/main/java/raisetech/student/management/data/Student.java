@@ -11,7 +11,7 @@ public class Student {
   private String furigana;
   private String nickname;
   private String email;
-  private String address;
+  private String prefecture;
   private int age;
   private String gender;
   private String remark;
