@@ -1,15 +1,19 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
 
 <head>
   <meta charset="UTF-8">
-  <title>受講生登録</title>
+  <title>受講生詳細</title>
 </head>
 
 <body>
-<h1>受講生登録</h1>
-<form th:action="@{/registerStudent}" th:object="${studentDetail}" method="post">
+<h1>受講生詳細</h1>
+<form th:action="@{/updateStudent}" th:object="${studentDetail}" method="post">
 
+  <div>
+    <label for="studentId">ID:</label>
+    <input type="text" id="studentId" th:field="*{student.studentId}"  required />
+  </div>
   <div>
     <label for="fullName">名前(必須):</label>
     <input type="text" id="fullName" th:field="*{student.fullName}" required />
@@ -112,7 +116,7 @@
   </div>
 
   <div>
-    <button type="submit">登録</button>
+    <button type="submit">更新</button>
   </div>
 
 </form>
