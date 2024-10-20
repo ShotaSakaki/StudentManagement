@@ -107,6 +107,11 @@
   </div>
 
   <div th:each="course, stat : *{studentsCourses}">
+    <label for="courseId" th:for="studentCourse.__${stat.index}__.courseId">受講コースID:</label>
+    <input type="text" id="courseId" th:id="studentCourse.__${stat.index}__.courseId" th:field="*{studentsCourses[__${stat.index}__].courseId}" required />
+  </div>
+
+  <div th:each="course, stat : *{studentsCourses}">
     <label for="studentCourse.__${stat.index}__.courseName" th:for="studentCourse.__${stat.index}__.courseName">受講コース名: </label>
     <select id="studentCourse.__${stat.index}__.courseName" th:field="*{studentsCourses[__${stat.index}__].courseName}" >
       <option value="TOEIC">TOEIC</option>
