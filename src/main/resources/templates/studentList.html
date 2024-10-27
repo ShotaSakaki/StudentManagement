@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<html xmlns:th = "http://www.thymeleaf.org" lang = "ja">
 <head>
-  <meta charset="UTF-8">
+  <meta charset = "UTF-8">
   <title>受講生一覧</title>
 </head>
 <body>
 <h1>受講生一覧</h1>
-<table border="1">
+<table border = "1">
   <thead>
   <tr>
     <th>ID</th>
@@ -18,21 +18,25 @@
     <th>年齢</th>
     <th>性別</th>
     <th>備考</th>
+    <th>キャンセル</th>
   </tr>
   </thead>
   <tbody>
-  <tr th:each="studentDetail:${studentList}">
-    <td th:text="${studentDetail.student.studentId}">1</td>
+  <tr th:each = "studentDetail:${studentList}">
+    <td th:text = "${studentDetail.student.id}">1</td>
     <td>
-      <a href="/studentList" th:href="@{/student/{studentId}(studentId=${studentDetail.student.studentId})}" th:text="${studentDetail.student.fullName}">新庄 剛志</a>
+      <a href = "/studentList" th:href = "@{/student/{id}(id = ${studentDetail.student.id})}" th:text = "${studentDetail.student.fullName}">新庄 剛志</a>
     </td>
-    <td th:text="${studentDetail.student.furigana}">しんじょう つよし</td>
-    <td th:text="${studentDetail.student.nickname}">BIGBOSS</td>
-    <td th:text="${studentDetail.student.email}">fansareourtreasure@fighters.com</td>
-    <td th:text="${studentDetail.student.prefecture}">北海道</td>
-    <td th:text="${studentDetail.student.age}">52</td>
-    <td th:text="${studentDetail.student.gender}">男</td>
-    <td th:text="${studentDetail.student.remark}">null</td>
+    <td th:text = "${studentDetail.student.furigana}">しんじょう つよし</td>
+    <td th:text = "${studentDetail.student.nickname}">BIGBOSS</td>
+    <td th:text = "${studentDetail.student.email}">fansareourtreasure@fighters.com</td>
+    <td th:text = "${studentDetail.student.prefecture}">北海道</td>
+    <td th:text = "${studentDetail.student.age}">52</td>
+    <td th:text = "${studentDetail.student.gender}">男</td>
+    <td th:text = "${studentDetail.student.remark}">null</td>
+    <td>
+      <input type = "checkbox" th:checked = "${studentDetail.student.isDeleted}" />
+    </td>
   </tr>
 
   </tbody>
