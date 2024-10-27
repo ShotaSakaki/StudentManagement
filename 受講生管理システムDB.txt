@@ -2,7 +2,7 @@
   受講生情報
     CREATE TABLE IF NOT EXISTS students
     (
-      id VARCHAR(36) PRIMARY KEY,
+      student_id VARCHAR(36) PRIMARY KEY,
       name VARCHAR(50) NOT NULL,
       kana_name VARCHAR(50) NOT NULL,
       nickname VARCHAR(50),
@@ -15,7 +15,7 @@
   受講生コース情報
      CREATE TABLE IF NOT EXISTS students_courses
      (
-       id VARCHAR(36) PRIMARY KEY,
+       course_id VARCHAR(36) PRIMARY KEY,
        student_id VARCHAR(36) NOT NULL,
        course_name VARCHAR(50) NOT NULL,
        course_start_at TIMESTAMP,
