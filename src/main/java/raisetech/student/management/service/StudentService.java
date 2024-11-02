@@ -1,5 +1,6 @@
 package raisetech.student.management.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,7 +12,7 @@ import raisetech.student.management.domain.StudentDetail;
 
 @Service
 public class StudentService {
-  private StudentRepository repository;
+  private final StudentRepository repository;
 
   @Autowired
   public StudentService(StudentRepository repository) {
@@ -22,11 +23,11 @@ public class StudentService {
     return repository.searchStudents();
   }
 
-  public StudentDetail searchStudent(int studentId){
-    Student student=repository.searchStudent(studentId);
-    List<StudentsCourses> studentsCourses= repository.searchStudentsCourses(
-        Integer.parseInt(student.getStudentId()));
-    StudentDetail studentDetail=new StudentDetail();
+  public StudentDetail searchStudent(int id){
+    Student student=repository.searchStudent(id);
+    List<StudentsCourses> studentsCourses = repository.searchStudentsCourses(
+        Integer.parseInt(student.getId()));
+    StudentDetail studentDetail = new StudentDetail();
     studentDetail.setStudent(student);
     studentDetail.setStudentsCourses(studentsCourses);
     return studentDetail;
@@ -39,16 +40,20 @@ public class StudentService {
   @Transactional
   public void registerStudent(StudentDetail studentDetail){
     repository.registerStudent(studentDetail.getStudent());
-    for (StudentsCourses studentsCourse:studentDetail.getStudentsCourses()){
-      repository.registerStudentsCourses(studentsCourse);
+    for (StudentsCourses studentsCourses:studentDetail.getStudentsCourses()){
+      studentsCourses.setStudentId(studentDetail.getStudent().getId());
+      studentsCourses.setStartDate(LocalDateTime.now());
+      studentsCourses.setEndDate(LocalDateTime.now().plusYears(1));
+      repository.registerStudentsCourses(studentsCourses);
     }
   }
 
   @Transactional
   public void updateStudent(StudentDetail studentDetail){
     repository.updateStudent(studentDetail.getStudent());
-    for (StudentsCourses studentsCourse: studentDetail.getStudentsCourses()){
-      repository.updateStudentsCourses(studentsCourse);
+    for (StudentsCourses studentsCourses: studentDetail.getStudentsCourses()){
+      studentsCourses.setStudentId(studentDetail.getStudent().getId());
+      repository.updateStudentsCourses(studentsCourses);
     }
   }
 
