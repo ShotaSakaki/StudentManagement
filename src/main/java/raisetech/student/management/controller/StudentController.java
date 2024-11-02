@@ -27,19 +27,10 @@ public class StudentController {
     this.converter = converter;
   }
 
-  private static boolean test(Student student) {
-    return !student.isDeleted();
-  }
-
   @GetMapping("/studentList")
   public String getStudentList(Model model){
     List<Student> students = service.searchStudentList();
     List<StudentsCourses> studentsCourses = service.searchStudentsCourseList();
-
-    /**List<Student> filteredStudents = students.stream()
-        .filter(student -> !student.isDeleted())
-            .toList();*/
-
     model.addAttribute("studentList",converter.convertStudentDetails(students,studentsCourses));
     return "studentList";
   }
