@@ -25,8 +25,8 @@ public interface StudentRepository {
   List<StudentsCourses> searchStudentsCourses(int studentId);
 
   @Insert(
-      "INSERT INTO students(full_name, furigana, nickname, email, prefecture, age, gender, remark, is_deleted)"
-          + " VALUES(#{fullName}, #{furigana}, #{nickname}, #{email}, #{prefecture}, #{age}, #{gender}, #{remark}, false)")
+      "INSERT INTO students(last_name, first_name, last_name_furigana, first_name_furigana, nickname, email, prefecture, age, gender, remark, is_deleted)"
+          + " VALUES(#{lastName}, #{firstName}, #{lastNameFurigana}, #{firstNameFurigana}, #{nickname}, #{email}, #{prefecture}, #{age}, #{gender}, #{remark}, false)")
   @Options(useGeneratedKeys = true, keyProperty = "id")
   void registerStudent(Student student);
 
@@ -36,7 +36,7 @@ public interface StudentRepository {
   void registerStudentsCourses(StudentsCourses studentsCourses);
 
   @Update(
-      "UPDATE students SET full_name = #{fullName},  furigana = #{furigana}, nickname = #{nickname}, email = #{email}, prefecture = #{prefecture}, age = #{age},"
+      "UPDATE students SET last_name = #{lastName}, first_name = #{firstName}, last_name_furigana = #{lastNameFurigana},  first_name_furigana = #{firstNameFurigana}, nickname = #{nickname}, email = #{email}, prefecture = #{prefecture}, age = #{age},"
           + " gender = #{gender}, remark = #{remark}, is_deleted = #{isDeleted} WHERE id = #{id}")
   void updateStudent(Student student);
 

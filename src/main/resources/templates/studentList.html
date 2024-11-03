@@ -11,7 +11,7 @@
   <tr>
     <th>ID</th>
     <th>名前</th>
-    <th>カナ名</th>
+    <th>ふりがな</th>
     <th>ニックネーム</th>
     <th>メールアドレス</th>
     <th>都道府県</th>
@@ -25,9 +25,9 @@
   <tr th:each = "studentDetail:${studentList}">
     <td th:text = "${studentDetail.student.id}">1</td>
     <td>
-      <a href = "/studentList" th:href = "@{/student/{id}(id = ${studentDetail.student.id})}" th:text = "${studentDetail.student.fullName}">新庄 剛志</a>
+      <a href = "/studentList" th:href = "@{/student/{id}(id = ${studentDetail.student.id})}" th:text = "${studentDetail.student.lastName} + ' ' + ${studentDetail.student.firstName}">新庄 剛志</a>
     </td>
-    <td th:text = "${studentDetail.student.furigana}">しんじょう つよし</td>
+    <td th:text = "${studentDetail.student.lastNameFurigana} + ' ' + ${studentDetail.student.firstNameFurigana}">しんじょう つよし</td>
     <td th:text = "${studentDetail.student.nickname}">BIGBOSS</td>
     <td th:text = "${studentDetail.student.email}">fansareourtreasure@fighters.com</td>
     <td th:text = "${studentDetail.student.prefecture}">北海道</td>

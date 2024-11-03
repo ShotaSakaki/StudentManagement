@@ -11,19 +11,23 @@
 <form th:action = "@{/registerStudent}" th:object = "${studentDetail}" method = "post">
 
   <div>
-    <label for = "fullName">名前(必須):</label>
-    <input type = "text" id = "fullName" th:field = "*{student.fullName}" required />
+    <label for = "lastName">姓<font color="red">※必須</font>:</label>
+    <input type = "text" id = "lastName" th:field = "*{student.lastName}" required />
+    <label for = "firstName">名<font color="red">※必須</font>:</label>
+    <input type = "text" id = "firstName" th:field = "*{student.firstName}" required />
   </div>
   <div>
-    <label for = "furigana">ふりがな(必須。ひらがな):</label>
-    <input type = "text" id = "furigana" th:field = "*{student.furigana}" required />
+    <label for = "lastNameFurigana">姓(ひらがな)<font color="red">※必須</font>:</label>
+    <input type = "text" id = "lastNameFurigana" th:field = "*{student.lastNameFurigana}" required />
+    <label for = "firstNameFurigana">名(ひらがな))<font color="red">※必須</font>:</label>
+    <input type = "text" id = "firstNameFurigana" th:field = "*{student.firstNameFurigana}" required />
   </div>
   <div>
     <label for = "nickname">ニックネーム:</label>
     <input type = "text" id = "nickname" th:field = "*{student.nickname}" />
   </div>
   <div>
-    <label for = "email">メールアドレス(必須):</label>
+    <label for = "email">メールアドレス<font color="red">※必須</font>:</label>
     <input type = "text" id = "email" th:field = "*{student.email}" required />
   </div>
 
