@@ -1,5 +1,6 @@
 package raisetech.student.management.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import java.util.List;
@@ -57,7 +58,7 @@ public class StudentController {
    * @return 実行結果
    */
   @PostMapping("/registerStudent")
-  public ResponseEntity<StudentDetail> registerStudent(@RequestBody StudentDetail studentDetail){
+  public ResponseEntity<StudentDetail> registerStudent(@RequestBody @Valid StudentDetail studentDetail){
     StudentDetail responseStudentDetail = service.registerStudent(studentDetail);
     return ResponseEntity.ok(responseStudentDetail);
   }
@@ -70,7 +71,7 @@ public class StudentController {
    * @return 実行結果
    */
   @PutMapping("/updateStudent")
-  public ResponseEntity<String> updateStudent(@RequestBody StudentDetail studentDetail){
+  public ResponseEntity<String> updateStudent(@RequestBody @Valid StudentDetail studentDetail){
     service.updateStudent(studentDetail);
     return ResponseEntity.ok("更新処理に成功しました");
   }
