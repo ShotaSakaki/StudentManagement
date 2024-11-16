@@ -1,6 +1,10 @@
 package raisetech.student.management.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,11 +41,17 @@ public class StudentController {
    *
    * @return 受講生詳細一覧(全件)
    */
+  @Operation(tags = "全件検索", summary = "受講生一覧検索", description = "受講生の一覧を検索します",
+      responses = {@ApiResponse(responseCode = "200", description = "受講生の詳細が一覧で出力される")
+      })
   @GetMapping("/studentList")
   public List<StudentDetail> getStudentList() {
     return service.searchStudentList();
   }
 
+  @Operation(tags = "例外処理", summary = "受講生一覧検索(例外処理)", description = "受講生の一覧を検索します(URLが間違っている場合の処理)",
+      responses = {@ApiResponse(responseCode = "200", description = "「全件検索は http://localhost:8080/studentList を使用してください」と表示される")
+      })
   @GetMapping("/studentListException")
   public List<StudentDetail> getStudentListException() throws TestException{
     throw new TestException("全件検索は http://localhost:8080/studentList を使用してください");
@@ -54,8 +64,14 @@ public class StudentController {
    * @param id 受講生ID
    * @return 受講生
    */
+  @Operation(tags = "検索", summary = "受講生検索", description = "IDに紐づく任意の受講生の情報を取得します",
+      responses = {@ApiResponse(responseCode = "200", description = "IDに紐づく任意の受講生の情報が出力される")
+      })
   @GetMapping("/student/{id}")
-  public StudentDetail getStudent(@PathVariable int id){
+  public StudentDetail getStudent(
+      @PathVariable
+      @NotBlank
+      @Pattern(regexp = "^\\d+$", message = "IDは数字を指定してください") String id){
     return service.searchStudent(id);
   }
 
@@ -65,6 +81,9 @@ public class StudentController {
    * @param studentDetail 受講生詳細
    * @return 実行結果
    */
+  @Operation(tags = "登録", summary = "受講生登録", description = "受講生を登録します",
+      responses = {@ApiResponse(responseCode = "200", description = "登録された情報が出力される")
+      })
   @PostMapping("/registerStudent")
   public ResponseEntity<StudentDetail> registerStudent(@RequestBody @Valid StudentDetail studentDetail){
     StudentDetail responseStudentDetail = service.registerStudent(studentDetail);
@@ -78,6 +97,9 @@ public class StudentController {
    * @param studentDetail 受講生詳細
    * @return 実行結果
    */
+  @Operation(tags = "更新", summary = "受講生情報更新", description = "受講生情報を更新します。キャンセルフラグの更新もここで行います(論理削除)",
+      responses = {@ApiResponse(responseCode = "200", description = "更新されたの受講生の情報が出力される")
+      })
   @PutMapping("/updateStudent")
   public ResponseEntity<String> updateStudent(@RequestBody @Valid StudentDetail studentDetail){
     service.updateStudent(studentDetail);
