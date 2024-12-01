@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -102,9 +101,9 @@ class StudentServiceTest {
 
     sut.initStudentsCourse(studentCourse, student);
 
-    Assertions.assertEquals(studentId, studentCourse.getStudentId());
-    Assertions.assertEquals(LocalDateTime.now().getHour(), studentCourse.getStartDate().getHour());
-    Assertions.assertEquals(LocalDateTime.now().plusYears(1).getYear(), studentCourse.getEndDate().getYear());
+    assertEquals(studentId, studentCourse.getStudentId());
+    assertEquals(LocalDateTime.now().getHour(), studentCourse.getStartDate().getHour());
+    assertEquals(LocalDateTime.now().plusYears(1).getYear(), studentCourse.getEndDate().getYear());
   }
 
   @Test
