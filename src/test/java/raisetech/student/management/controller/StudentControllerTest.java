@@ -33,6 +33,7 @@ class StudentControllerTest {
 
   private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
+  //受講生詳細の全件検索ができて空のリストが返ってくること
   @Test
   void studentListTest() throws Exception{
      mockMvc.perform(get("/studentList")).andExpect(status().isOk()).andExpect(content().json("[]"));
@@ -40,6 +41,7 @@ class StudentControllerTest {
     verify(service, times(1)).searchStudentList();
   }
 
+  //受講生詳細の単一検索ができて、対象となる受講生のリストが返ってくること
   @Test
   void studentIdTest() throws Exception{
     String id = "123";
@@ -47,6 +49,7 @@ class StudentControllerTest {
     verify(service, times(1)).searchStudent(id);
   }
 
+  //受講生詳細の新規登録が実行できて、登録された受講生のリストが返ってくること
   @Test
   void registerTest() throws Exception{
     mockMvc.perform(post("/registerStudent").contentType(MediaType.APPLICATION_JSON).content(
@@ -76,6 +79,7 @@ class StudentControllerTest {
     verify(service, times(1)).registerStudent(any());
   }
 
+  //受講生詳細の更新が実行できて、特定のメッセージが表示されること
   @Test
   void updateTest() throws Exception{
 mockMvc.perform(put("/updateStudent").contentType(MediaType.APPLICATION_JSON).content(
@@ -110,6 +114,7 @@ mockMvc.perform(put("/updateStudent").contentType(MediaType.APPLICATION_JSON).co
 verify(service, times(1)).updateStudent(any());
   }
 
+  //受講生詳細の例外APIが実行できてステータスが400で返ってくること
   @Test
   void studentListExceptionTest() throws Exception{
     mockMvc.perform(get("/studentListException"))
@@ -117,6 +122,7 @@ verify(service, times(1)).updateStudent(any());
         .andExpect(content().string("全件検索は http://localhost:8080/studentList を使用してください"));
   }
 
+  //受講生詳細の受講生で、適切な値を入力したときにエラーが発生しないこと
   @Test
   void inputErrorCheckTest(){
     Student student = new Student();
@@ -132,6 +138,7 @@ verify(service, times(1)).updateStudent(any());
     assertThat(violations.size()).isEqualTo(0);
   }
 
+  //受講生詳細の受講生で、IDに数字以外を用いたときに入力チェックに掛かること
   @Test
   void inputCheckTest(){
     Student student = new Student();
