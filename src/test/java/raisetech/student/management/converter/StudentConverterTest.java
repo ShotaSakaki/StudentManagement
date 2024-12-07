@@ -36,8 +36,8 @@ public class StudentConverterTest {
 
     List<StudentDetail> actual = sut.convertStudentDetails(studentList, studentCourseList);
 
-    assertThat(actual.get(0).getStudent()).isEqualTo(student);
-    assertThat(actual.get(0).getStudentCourseList()).isEqualTo(studentCourseList);
+    assertThat(actual.getFirst().getStudent()).isEqualTo(student);
+    assertThat(actual.getFirst().getStudentCourseList()).isEqualTo(studentCourseList);
   }
 
   //受講生のリストと受講生コース情報のリストを渡したときに紐づかない受講生コース情報は除外されること
@@ -57,8 +57,8 @@ public class StudentConverterTest {
 
     List<StudentDetail> actual = sut.convertStudentDetails(studentList, studentCourseList);
 
-    assertThat(actual.get(0).getStudent()).isEqualTo(student);
-    assertThat(actual.get(0).getStudentCourseList()).isEmpty();
+    assertThat(actual.getFirst().getStudent()).isEqualTo(student);
+    assertThat(actual.getFirst().getStudentCourseList()).isEmpty();
   }
 
   private static Student createStudent() {
