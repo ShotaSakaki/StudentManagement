@@ -19,9 +19,8 @@ public class StudentConverterTest {
     sut = new StudentConverter();
   }
 
-  //受講生のリストと受講生コース情報のリストを返して受講生詳細のリストが作成できること
   @Test
-  void convertStudentDetailsTest(){
+  void 受講生のリストと受講生コース情報のリストを返して受講生詳細のリストが作成できること(){
     Student student = createStudent();
 
     StudentCourse studentCourse = new StudentCourse();
@@ -40,9 +39,8 @@ public class StudentConverterTest {
     assertThat(actual.getFirst().getStudentCourseList()).isEqualTo(studentCourseList);
   }
 
-  //受講生のリストと受講生コース情報のリストを渡したときに紐づかない受講生コース情報は除外されること
   @Test
-  void convertStudentDetailsExceptionTest(){
+  void 受講生のリストと受講生コース情報のリストを渡したときに紐づかない受講生コース情報は除外されること(){
     Student student = createStudent();
 
     StudentCourse studentCourse = new StudentCourse();
