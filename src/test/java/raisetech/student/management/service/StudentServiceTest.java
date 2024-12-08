@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +38,7 @@ class StudentServiceTest {
   }
 
   @Test
-  void searchTest(){
+  void 受講生詳細の一覧検索_リポジトリとコンバータの処理が適切に呼び出されること(){
     List<Student> studentList = new ArrayList<>();
     List<StudentCourse> studentCourseList = new ArrayList<>();
     when(repository.search()).thenReturn(studentList);
@@ -53,7 +52,7 @@ class StudentServiceTest {
   }
 
   @Test
-  void searchStudentTest(){
+  void 受講生詳細の検索_リポジトリの処理が適切に呼び出され期待通りの結果を返すこと(){
     String id = "123";
     Student student = new Student();
     student.setId(id);
@@ -70,7 +69,7 @@ class StudentServiceTest {
   }
 
   @Test
-  void registerStudentTest(){
+  void 受講生登録処理_リポジトリの処理が適切に呼び出され期待通りの結果を返すこと(){
     Student mockStudent = new Student();
     StudentCourse course1 = new StudentCourse();
     StudentCourse course2 = new StudentCourse();
@@ -94,7 +93,7 @@ class StudentServiceTest {
   }
 
   @Test
-  void initStudentsCourseTest(){
+  void 受講生詳細の登録_初期化処理が行われること(){
     String studentId = "123";
     Student student = new Student();
     student.setId(studentId);
@@ -102,13 +101,13 @@ class StudentServiceTest {
 
     sut.initStudentsCourse(studentCourse, student);
 
-    Assertions.assertEquals(studentId, studentCourse.getStudentId());
-    Assertions.assertEquals(LocalDateTime.now().getHour(), studentCourse.getStartDate().getHour());
-    Assertions.assertEquals(LocalDateTime.now().plusYears(1).getYear(), studentCourse.getEndDate().getYear());
+    assertEquals(studentId, studentCourse.getStudentId());
+    assertEquals(LocalDateTime.now().getHour(), studentCourse.getStartDate().getHour());
+    assertEquals(LocalDateTime.now().plusYears(1).getYear(), studentCourse.getEndDate().getYear());
   }
 
   @Test
-  void updateStudentTest(){
+  void 受講生情報更新処理_リポジトリの処理が適切に呼び出されること(){
     Student mockStudent = new Student();
     StudentCourse course1 = new StudentCourse();
     StudentCourse course2 = new StudentCourse();
