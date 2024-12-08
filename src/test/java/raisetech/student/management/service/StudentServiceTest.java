@@ -37,9 +37,8 @@ class StudentServiceTest {
     sut = new StudentService(repository, converter);
   }
 
-  //受講生詳細の一覧検索_リポジトリとコンバータの処理が適切に呼び出されること
   @Test
-  void searchTest(){
+  void 受講生詳細の一覧検索_リポジトリとコンバータの処理が適切に呼び出されること(){
     List<Student> studentList = new ArrayList<>();
     List<StudentCourse> studentCourseList = new ArrayList<>();
     when(repository.search()).thenReturn(studentList);
@@ -52,9 +51,8 @@ class StudentServiceTest {
     verify(converter, times(1)).convertStudentDetails(studentList, studentCourseList);
   }
 
-  //受講生詳細の検索_リポジトリの処理が適切に呼び出され期待通りの結果を返すこと
   @Test
-  void searchStudentTest(){
+  void 受講生詳細の検索_リポジトリの処理が適切に呼び出され期待通りの結果を返すこと(){
     String id = "123";
     Student student = new Student();
     student.setId(id);
@@ -70,9 +68,8 @@ class StudentServiceTest {
     assertEquals(expected.getStudent().getId(), actual.getStudent().getId());
   }
 
-  //受講生登録処理_リポジトリの処理が適切に呼び出され期待通りの結果を返すこと
   @Test
-  void registerStudentTest(){
+  void 受講生登録処理_リポジトリの処理が適切に呼び出され期待通りの結果を返すこと(){
     Student mockStudent = new Student();
     StudentCourse course1 = new StudentCourse();
     StudentCourse course2 = new StudentCourse();
@@ -95,9 +92,8 @@ class StudentServiceTest {
         -> assertEquals(mockStudent.getId(), course.getStudentId()));
   }
 
-  //受講生詳細の登録_初期化処理が行われること
   @Test
-  void initStudentsCourseTest(){
+  void 受講生詳細の登録_初期化処理が行われること(){
     String studentId = "123";
     Student student = new Student();
     student.setId(studentId);
@@ -110,9 +106,8 @@ class StudentServiceTest {
     assertEquals(LocalDateTime.now().plusYears(1).getYear(), studentCourse.getEndDate().getYear());
   }
 
-  //受講生情報更新処理_リポジトリの処理が適切に呼び出されること
   @Test
-  void updateStudentTest(){
+  void 受講生情報更新処理_リポジトリの処理が適切に呼び出されること(){
     Student mockStudent = new Student();
     StudentCourse course1 = new StudentCourse();
     StudentCourse course2 = new StudentCourse();
