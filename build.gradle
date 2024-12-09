@@ -49,18 +49,17 @@ dependencies {
 	// MyBatis
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
 
-	//APサーバー(Tomcat)
-    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+	//APサーバー
+	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 
-    //SpringBootTest
+	//SpringBootTest
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-    //MyBatisTest
-    testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3'
+	//MyBatisTest
+	testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3'
 
 	//H2(InMemoryDB)
 	testImplementation 'com.h2database:h2:2.2.224'
-
 
 }
 

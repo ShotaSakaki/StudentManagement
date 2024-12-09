@@ -32,21 +32,21 @@ class StudentControllerTest {
   private StudentService service;
 
   private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-  
+
   @Test
   void 受講生詳細の全件検索ができて空のリストが返ってくること() throws Exception{
      mockMvc.perform(get("/studentList")).andExpect(status().isOk()).andExpect(content().json("[]"));
 
     verify(service, times(1)).searchStudentList();
   }
-  
+
   @Test
   void 受講生詳細の単一検索ができて対象となる受講生のリストが返ってくること() throws Exception{
     String id = "123";
     mockMvc.perform(get("/student/{id}", id)).andExpect(status().isOk());
     verify(service, times(1)).searchStudent(id);
   }
-  
+
   @Test
   void 受講生詳細の新規登録が実行できて登録された受講生のリストが返ってくること() throws Exception{
     mockMvc.perform(post("/registerStudent").contentType(MediaType.APPLICATION_JSON).content(
