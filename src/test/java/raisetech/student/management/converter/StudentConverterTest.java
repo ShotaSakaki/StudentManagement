@@ -20,7 +20,7 @@ public class StudentConverterTest {
   }
 
   @Test
-  void 受講生のリストと受講生コース情報のリストを返して受講生詳細のリストが作成できること(){
+  void 受講生のリストと受講生コース情報のリストを渡して受講生詳細のリストが作成できること(){
     Student student = createStudent();
 
     StudentCourse studentCourse = new StudentCourse();
