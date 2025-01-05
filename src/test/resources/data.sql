@@ -5,7 +5,7 @@ VALUES('新庄', '剛志', 'しんじょう', 'つよし', 'BIGBOSS', 'fansareou
             ('松田', '里奈', 'まつだ', 'りな', 'まつり', 'motoginkouin@sakurazaka46.com', '宮崎県', 25, '女', false),
             ('吉井', '理人', 'よしい', 'まさと', 'うま味紳士', 'jibuntachiwokoeteike@marines.com', '千葉県', 59, '男', false);
 
-INSERT INTO students_courses(student_id, course_name, start_date, end_date, is_deleted)
+INSERT INTO students_courses(student_id, course_name, start_date, end_date, status)
     VALUES(1, 'TOEIC', '2024-04-01 00:00:00', '2024-09-30 23:59:59', '本申込'),
                 (5, 'TOEIC', '2024-04-01 00:00:00', '2024-09-30 23:59:59', '受講中'),
                 (2, 'CAD', '2024-05-01 00:00:00', '2024-08-31 23:59:59', '仮申込'),

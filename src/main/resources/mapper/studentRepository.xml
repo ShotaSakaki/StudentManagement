@@ -41,8 +41,8 @@
 
   <!--受講生のコース情報新規登録  -->
   <insert id = "registerStudentCourse" parameterType = "raisetech.student.management.data.StudentCourse" useGeneratedKeys = "true" keyProperty = "id">
-    INSERT INTO students_courses(student_id, course_name, start_date, end_date, is_deleted)
-    VALUES(#{studentId}, #{courseName}, #{startDate}, #{endDate}, false)
+    INSERT INTO students_courses(student_id, course_name, start_date, end_date, status)
+    VALUES(#{studentId}, #{courseName}, #{startDate}, #{endDate}, '仮申込')
   </insert>
 
   <!-- 受講生情報の更新-->
