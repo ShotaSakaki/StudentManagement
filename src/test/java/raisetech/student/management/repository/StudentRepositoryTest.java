@@ -21,15 +21,26 @@ class StudentRepositoryTest {
     List<Student> actual = sut.search();
     assertThat(actual.size()).isEqualTo(5);
 
-    assertThat(actual.getFirst().getLastName()).isEqualTo("新庄");
-    assertThat(actual.getFirst().getFirstName()).isEqualTo("剛志");
-    assertThat(actual.getFirst().getLastNameFurigana()).isEqualTo("しんじょう");
-    assertThat(actual.getFirst().getFirstNameFurigana()).isEqualTo("つよし");
-    assertThat(actual.getFirst().getNickname()).isEqualTo("BIGBOSS");
-    assertThat(actual.getFirst().getEmail()).isEqualTo("fansareourtreasure@fighters.com");
-    assertThat(actual.getFirst().getPrefecture()).isEqualTo("北海道");
-    assertThat(actual.getFirst().getAge()).isEqualTo(52);
-    assertThat(actual.getFirst().getGender()).isEqualTo("男");
+    assertThat(actual.get(0).getLastName()).isEqualTo("新庄");
+    assertThat(actual.get(0).getFirstName()).isEqualTo("剛志");
+    assertThat(actual.get(0).getLastNameFurigana()).isEqualTo("しんじょう");
+    assertThat(actual.get(0).getFirstNameFurigana()).isEqualTo("つよし");
+    assertThat(actual.get(0).getNickname()).isEqualTo("BIGBOSS");
+    assertThat(actual.get(0).getEmail()).isEqualTo("fansareourtreasure@fighters.com");
+    assertThat(actual.get(0).getPrefecture()).isEqualTo("北海道");
+    assertThat(actual.get(0).getAge()).isEqualTo(52);
+    assertThat(actual.get(0).getGender()).isEqualTo("男");
+  }
+
+  @Test
+  void 受講生の新規登録が行えること(){
+    Student student = createStudent();
+
+    sut.registerStudent(student);
+
+    List<Student> mockStudent = sut.search();
+
+    assertThat(mockStudent.size()).isEqualTo(6);
   }
 
   @Test
@@ -48,51 +59,65 @@ class StudentRepositoryTest {
   }
 
   @Test
+  void 存在しないIDで受講生を検索するとnullが返されること(){
+    Student actual = sut.searchStudent("999");
+    assertThat(actual).isNull();
+  }
+
+  @Test
+  void 指定した条件で受講生を検索できること(){
+    String lastName = "新庄";
+    String firstName = "剛志";
+    List<Student> result = sut.searchWithConditions(lastName, firstName);
+
+    assertThat(result).hasSize(1);
+    assertThat(result.get(0).getLastName()).isEqualTo(lastName);
+    assertThat(result.get(0).getFirstName()).isEqualTo(firstName);
+  }
+
+  @Test
+  void 検索条件にnullを渡しても全件が取得できること(){
+    List<Student> actual = sut.searchWithConditions(null, null);
+    assertThat(actual).hasSize(5);
+  }
+
+  @Test
   void 受講生のコース情報を全件検索できること(){
     List<StudentCourse> actual = sut.searchStudentCourseList();
     assertThat(actual.size()).isEqualTo(5);
 
-    assertThat(actual.getFirst().getStudentId()).isEqualTo("1");
-    assertThat(actual.getFirst().getCourseName()).isEqualTo("TOEIC");
-    assertThat(actual.getFirst().getStartDate()).isEqualTo(LocalDateTime.of(2024, 4, 1, 0, 0,0));
-    assertThat(actual.getFirst().getEndDate()).isEqualTo(LocalDateTime.of(2024, 9, 30, 23, 59,59));
+    assertThat(actual.get(0).getStudentId()).isEqualTo("1");
+    assertThat(actual.get(0).getCourseName()).isEqualTo("TOEIC");
+    assertThat(actual.get(0).getStartDate()).isEqualTo(LocalDateTime.of(2024,4,1,0,0,0));
+    assertThat(actual.get(0).getEndDate()).isEqualTo(LocalDateTime.of(2024,9,30,23,59,59));
   }
 
   @Test
-  void 受講生IDで紐づくコース名を検索できること(){
+  void 受講生IDで紐づくコース名を単一検索できること(){
     List<StudentCourse> actual = sut.searchStudentCourse("1");
     assertThat(actual.size()).isEqualTo(1);
-
-    assertThat(actual.getFirst().getStudentId()).isEqualTo("1");
-    assertThat(actual.getFirst().getCourseName()).isEqualTo("TOEIC");
-    assertThat(actual.getFirst().getStartDate()).isEqualTo(LocalDateTime.of(2024, 4, 1, 0, 0,0));
-    assertThat(actual.getFirst().getEndDate()).isEqualTo(LocalDateTime.of(2024, 9, 30, 23, 59,59));
+    assertThat(actual.get(0).getCourseName()).isEqualTo("TOEIC");
+    assertThat(actual.get(0).getStartDate()).isEqualTo(LocalDateTime.of(2024,4,1,0,0,0));
+    assertThat(actual.get(0).getEndDate()).isEqualTo(LocalDateTime.of(2024,9,30,23,59,59));
   }
 
   @Test
-  void 受講生の登録が行えること(){
-    Student student = new Student();
-    student.setLastName("新庄");
-    student.setFirstName("剛志");
-    student.setLastNameFurigana("しんじょう");
-    student.setFirstNameFurigana("つよし");
-    student.setNickname("BIGBOSS");
-    student.setEmail("fansareourtreasure@fighters.com");
-    student.setPrefecture("北海道");
-    student.setAge(52);
-    student.setGender("男");
-    student.setRemark("");
-    student.setDeleted(false);
+  void 指定した条件で受講生のコース情報を検索できること(){
+    String courseName = "TOEIC";
+    LocalDateTime startDate = LocalDateTime.of(2024,4,1,0,0,0);
+    LocalDateTime endDate = LocalDateTime.of(2024,9,30,23,59,59);
+    String status = "本申込";
 
-    sut.registerStudent(student);
+    List<StudentCourse> result = sut.searchStudentCourseListWithConditions(courseName, startDate, endDate, status);
 
-    List<Student> actual = sut.search();
-
-    assertThat(actual.size()).isEqualTo(6);
+    assertThat(result).hasSize(2);
+    assertThat(result.get(0).getCourseName()).isEqualTo(courseName);
+    assertThat(result.get(0).getStartDate()).isEqualTo(startDate);
+    assertThat(result.get(0).getEndDate()).isEqualTo(endDate);
   }
 
   @Test
-  void 受講生コース情報を登録できること(){
+  void 新しい受講生コース情報を登録できること(){
     StudentCourse studentCourse = new StudentCourse();
     studentCourse.setStudentId("2");
     studentCourse.setCourseName("Java");
@@ -108,38 +133,42 @@ class StudentRepositoryTest {
 
   @Test
   void 受講生情報を更新できること(){
-    Student student = new Student();
-    student.setId("4");
-    student.setLastName("松田");
-    student.setFirstName("好花");
-    student.setLastNameFurigana("まつだ");
-    student.setFirstNameFurigana("このか");
-    student.setNickname("だーこの");
-    student.setEmail("aaa@hinatazaka46.com");
-    student.setPrefecture("京都府");
-    student.setAge(25);
-    student.setGender("女");
-    student.setRemark("");
-    student.setDeleted(false);
+    Student student = sut.searchStudent("4");
+    assertThat(student).isNotNull();
 
+    student.setFirstName("好花");
     sut.updateStudent(student);
 
-    Student actual = sut.searchStudent("4");
-
-    assertThat(actual.getLastName()).isEqualTo("松田");
+    Student updatedStudent = sut.searchStudent("4");
+    assertThat(updatedStudent.getFirstName()).isEqualTo("好花");
   }
 
   @Test
   void  受講生コース情報を更新できること(){
-    List<StudentCourse> courses = sut.searchStudentCourse("4");
+    List<StudentCourse> courses = sut.searchStudentCourse("1");
     assertThat(courses).isNotEmpty();
 
-    StudentCourse course = courses.getFirst();
+    StudentCourse course = courses.get(0);
     course.setCourseName("バイナリーオプショントレード");
     sut.updateStudentCourse(course);
 
-    List<StudentCourse> updateCourses = sut.searchStudentCourse("4");
-    assertThat(updateCourses.getFirst().getCourseName()).isEqualTo("バイナリーオプショントレード");
+    List<StudentCourse> updateCourses = sut.searchStudentCourse("1");
+    assertThat(updateCourses.get(0).getCourseName()).isEqualTo("バイナリーオプショントレード");
+  }
+
+  private Student createStudent(){
+    Student student = new Student();
+    student.setLastName("新庄");
+    student.setFirstName("剛志");
+    student.setLastNameFurigana("しんじょう");
+    student.setFirstNameFurigana("つよし");
+    student.setNickname("BIGBOSS");
+    student.setEmail("北海道");
+    student.setAge(52);
+    student.setGender("男");
+    student.setRemark("");
+    student.setDeleted(false);
+    return student;
   }
 
 }

@@ -4,14 +4,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +33,9 @@ class StudentControllerTest {
   @Autowired
   private MockMvc mockMvc;
 
+  @Autowired
+  private ObjectMapper objectMapper;
+
   @MockBean
   private StudentService service;
 
@@ -35,13 +43,33 @@ class StudentControllerTest {
 
   @Test
   void 受講生詳細の全件検索ができて空のリストが返ってくること() throws Exception{
-     mockMvc.perform(get("/studentList")).andExpect(status().isOk()).andExpect(content().json("[]"));
+    when(service.searchStudentList(
+        any(String.class),
+        any(String.class),
+        any(String.class),
+        any(LocalDateTime.class),
+        any(LocalDateTime.class),
+        any(String.class)
+    )).thenReturn(Collections.emptyList());
 
-    verify(service, times(1)).searchStudentList();
+    mockMvc.perform(get("/studentList")
+        .param("lastName", "新庄")
+        .param("firstName", "剛志")
+        .param("courseName", "TOEIC")
+        .param("startDate", "2024-04-01T00:00:00")
+        .param("endDate", "2025-03-31T00:00:00")
+        .param("status", "仮申込"))
+        .andExpect(status().isOk())
+        .andExpect(content().json("[]"));
+
+    verify(service, times(1)).searchStudentList(
+        "新庄", "剛志", "TOEIC",
+        LocalDateTime.parse("2024-04-01T00:00:00"), LocalDateTime.parse("2025-03-31T00:00:00"),
+        "仮申込");
   }
 
   @Test
-  void 受講生詳細の単一検索ができて対象となる受講生のリストが返ってくること() throws Exception{
+  void IDを用いて受講生詳細の単一検索ができて対象となる受講生のリストが返ってくること() throws Exception{
     String id = "123";
     mockMvc.perform(get("/student/{id}", id)).andExpect(status().isOk());
     verify(service, times(1)).searchStudent(id);
@@ -106,7 +134,9 @@ mockMvc.perform(put("/updateStudent").contentType(MediaType.APPLICATION_JSON).co
             ]
         }
         """
-)).andExpect(status().isOk());
+))
+    .andExpect(status().isOk())
+    .andExpect(content().string("更新処理に成功しました"));
 verify(service, times(1)).updateStudent(any());
   }
 
@@ -114,7 +144,7 @@ verify(service, times(1)).updateStudent(any());
   void 受講生詳細の例外APIが実行できてステータスが400で返ってくること() throws Exception{
     mockMvc.perform(get("/studentListException"))
         .andExpect(status().is4xxClientError())
-        .andExpect(content().string("全件検索は http://localhost:8080/studentList を使用してください"));
+        .andExpect(content().string("エラーが発生しました"));
   }
 
   @Test
@@ -125,7 +155,11 @@ verify(service, times(1)).updateStudent(any());
     student.setFirstName("剛志");
     student.setLastNameFurigana("しんじょう");
     student.setFirstNameFurigana("つよし");
+    student.setNickname("BIGBOSS");
     student.setEmail("fansareourtreasure@fighters.com");
+    student.setPrefecture("北海道");
+    student.setAge(52);
+    student.setGender("男");
 
     Set<ConstraintViolation<Student>> violations = validator.validate(student);
 
@@ -140,11 +174,23 @@ verify(service, times(1)).updateStudent(any());
     student.setFirstName("剛志");
     student.setLastNameFurigana("しんじょう");
     student.setFirstNameFurigana("つよし");
+    student.setNickname("BIGBOSS");
     student.setEmail("fansareourtreasure@fighters.com");
+    student.setPrefecture("北海道");
+    student.setAge(52);
+    student.setGender("男");
 
     Set<ConstraintViolation<Student>> violations = validator.validate(student);
 
     assertThat(violations.size()).isEqualTo(1);
     assertThat(violations).extracting("message").containsOnly("数字のみを入力するようにしてください");
   }
+
+  @Test
+  void コースステータス更新が成功すること() throws Exception{
+    mockMvc.perform(put("/updateCourseStatus/{courseId}", "123")
+        .param("status", "本申込"))
+        .andExpect(status().isOk()).andExpect(content().string("コースステータスを更新しました"));
+  }
+
 }

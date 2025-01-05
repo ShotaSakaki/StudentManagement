@@ -59,7 +59,7 @@ public class StudentConverterTest {
     assertThat(actual.getFirst().getStudentCourseList()).isEmpty();
   }
 
-  private static Student createStudent() {
+  public static Student createStudent() {
     Student student = new Student();
     student.setId("1");
     student.setLastName("新庄");

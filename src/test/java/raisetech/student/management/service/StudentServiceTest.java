@@ -2,6 +2,7 @@ package raisetech.student.management.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.annotation.Transactional;
 import raisetech.student.management.controller.converter.StudentConverter;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
@@ -38,21 +40,29 @@ class StudentServiceTest {
   }
 
   @Test
-  void 受講生詳細の一覧検索_リポジトリとコンバータの処理が適切に呼び出されること(){
+  void 受講生詳細の一覧検索_リポジトリとコンバータの処理が適切に呼び出されること() {
     List<Student> studentList = new ArrayList<>();
     List<StudentCourse> studentCourseList = new ArrayList<>();
-    when(repository.search()).thenReturn(studentList);
-    when(repository.searchStudentCourseList()).thenReturn(studentCourseList);
 
-    sut.searchStudentList();
+    String lastName = null;
+    String firstName = null;
+    when(repository.searchWithConditions(lastName, firstName)).thenReturn(studentList);
 
-    verify(repository, times(1)).search();
-    verify(repository, times(1)).searchStudentCourseList();
+    String courseName = null;
+    LocalDateTime startDate = null;
+    LocalDateTime endDate = null;
+    String status = null;
+    when(repository.searchStudentCourseListWithConditions(courseName, startDate, endDate, status)).thenReturn(studentCourseList);
+
+    sut.searchStudentList(lastName, firstName, courseName, startDate, endDate, status);
+
+    verify(repository, times(1)).searchWithConditions(lastName, firstName);
+    verify(repository, times(1)).searchStudentCourseListWithConditions(courseName, startDate, endDate, status);
     verify(converter, times(1)).convertStudentDetails(studentList, studentCourseList);
   }
 
   @Test
-  void 受講生詳細の検索_リポジトリの処理が適切に呼び出され期待通りの結果を返すこと(){
+  void 受講生詳細の単一検索_リポジトリの処理が適切に呼び出され期待通りの結果を返すこと(){
     String id = "123";
     Student student = new Student();
     student.setId(id);
@@ -70,61 +80,121 @@ class StudentServiceTest {
 
   @Test
   void 受講生登録処理_リポジトリの処理が適切に呼び出され期待通りの結果を返すこと(){
-    Student mockStudent = new Student();
-    StudentCourse course1 = new StudentCourse();
-    StudentCourse course2 = new StudentCourse();
-    List<StudentCourse> courseList = List.of(course1, course2);
+    Student mockstudent = new Student();
+    mockstudent.setId("1");
 
-    StudentDetail mockStudentDetail = new StudentDetail(mockStudent, courseList);
+    StudentCourse studentCourse = new StudentCourse();
+    List<StudentCourse> studentCourseList = List.of(studentCourse);
 
-    doNothing().when(repository).registerStudent(mockStudent);
+    StudentDetail mockstudentDetail = new StudentDetail(mockstudent, studentCourseList);
+
+    doNothing().when(repository).registerStudent(mockstudent);
     doNothing().when(repository).registerStudentCourse(any(StudentCourse.class));
 
-    StudentDetail result = sut.registerStudent(mockStudentDetail);
+    LocalDateTime now = LocalDateTime.now();
+    studentCourseList.forEach(course ->{
+      course.setStudentId(mockstudent.getId());
+      course.setStartDate(now);
+      course.setEndDate(now.plusYears(1));
+    });
+
+    StudentDetail result = sut.registerStudent(mockstudentDetail);
 
     assertNotNull(result);
-    assertEquals(mockStudentDetail, result);
+    assertEquals(mockstudentDetail, result);
 
-    verify(repository, times(1)).registerStudent(mockStudent);
-    verify(repository, times(2)).registerStudentCourse(any(StudentCourse.class));
+    verify(repository, times(1)).registerStudent(mockstudent);
+    verify(repository, times(1)).registerStudentCourse(any(StudentCourse.class));
 
-    courseList.forEach(course
-        -> assertEquals(mockStudent.getId(), course.getStudentId()));
+    studentCourseList.forEach(course ->{
+      assertEquals(mockstudent.getId(), course.getStudentId());
+      assertNotNull(course.getStartDate());
+      assertNotNull(course.getEndDate());
+    });
   }
 
   @Test
   void 受講生詳細の登録_初期化処理が行われること(){
-    String studentId = "123";
+    String id = "123";
     Student student = new Student();
-    student.setId(studentId);
+    student.setId(id);
     StudentCourse studentCourse = new StudentCourse();
 
-    sut.initStudentsCourse(studentCourse, student);
+    sut.initStudentsCourse(studentCourse, student.getId());
 
-    assertEquals(studentId, studentCourse.getStudentId());
+    assertEquals(id, studentCourse.getStudentId());
     assertEquals(LocalDateTime.now().getHour(), studentCourse.getStartDate().getHour());
     assertEquals(LocalDateTime.now().plusYears(1).getYear(), studentCourse.getEndDate().getYear());
   }
 
   @Test
   void 受講生情報更新処理_リポジトリの処理が適切に呼び出されること(){
-    Student mockStudent = new Student();
-    StudentCourse course1 = new StudentCourse();
-    StudentCourse course2 = new StudentCourse();
-    List<StudentCourse> courseList = List.of(course1, course2);
+    Student mockstudent = new Student();
+    StudentCourse studentCourse = new StudentCourse();
+    List<StudentCourse> studentCourseList = List.of(studentCourse);
 
-    StudentDetail mockStudentDetail = new StudentDetail(mockStudent, courseList);
+    StudentDetail mockstudentDetail = new StudentDetail(mockstudent, studentCourseList);
 
-    doNothing().when(repository).updateStudent(mockStudent);
+    doNothing().when(repository).updateStudent(mockstudent);
     doNothing().when(repository).updateStudentCourse(any(StudentCourse.class));
 
-    sut.updateStudent(mockStudentDetail);
+    sut.updateStudent(mockstudentDetail);
 
-    verify(repository, times(1)).updateStudent(mockStudent);
+    verify(repository, times(1)).updateStudent(mockstudent);
 
-    verify(repository, times(2)).updateStudentCourse(any(StudentCourse.class));
-    verify(repository, times(1)).updateStudentCourse(course1);
-    verify(repository, times(1)).updateStudentCourse(course2);
+
+    verify(repository, times(1)).updateStudentCourse(any(StudentCourse.class));
+    verify(repository, times(1)).updateStudentCourse(studentCourse);
+  }
+
+  @Test
+  void 新規コース登録時の初期ステータスが仮申込であることを確認できること(){
+    StudentCourse course = new StudentCourse();
+    sut.initStudentsCourse(course, "123");
+
+    assertEquals("仮申込", course.getStatus());
+    assertEquals("123", course.getStudentId());
+    assertNotNull(course.getStartDate());
+    assertNotNull(course.getEndDate());
+  }
+
+  @Test
+  @Transactional
+  public void 指定したコースIDに対して新しいステータスを正しく更新できること(){
+    String courseId = "1";
+    String newStatus = "受講中";
+
+    sut.updateCourseStatus(courseId, newStatus);
+
+    StudentCourse updatedCourse = repository.searchStudentCourse(courseId).get(0);
+    assertEquals(newStatus, updatedCourse.getStatus());
+  }
+
+  @Test
+  void ステータス更新の確認_正しい順序で更新されていること(){
+    StudentCourse course = new StudentCourse();
+    course.setStatus("本申込");
+
+      sut.updateCourseStatus(course.getId(), "本申込");
+      assertEquals("本申込", course.getStatus());
+
+      sut.updateCourseStatus(course.getId(), "受講中");
+      assertEquals("受講中", course.getStatus());
+
+      sut.updateCourseStatus(course.getId(), "受講終了");
+      assertEquals("受講終了", course.getStatus());
+  }
+
+  @Test
+  void 不正なステータスを指定した場合の例外処理(){
+    StudentCourse course = new StudentCourse();
+    course.setStatus("仮申込");
+
+    IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+      sut.updateCourseStatus(course.getId(), "受講終了");
+    });
+
+    assertEquals("無効なステータス遷移： 仮申込->受講終了", exception.getMessage());
   }
 
 }
