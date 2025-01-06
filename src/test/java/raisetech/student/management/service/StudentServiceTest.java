@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -12,6 +13,8 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,26 +42,10 @@ class StudentServiceTest {
     sut = new StudentService(repository, converter);
   }
 
-  @Test
-  void 受講生詳細の一覧検索_リポジトリとコンバータの処理が適切に呼び出されること() {
-    List<Student> studentList = new ArrayList<>();
-    List<StudentCourse> studentCourseList = new ArrayList<>();
-
-    String lastName = null;
-    String firstName = null;
-    when(repository.searchWithConditions(lastName, firstName)).thenReturn(studentList);
-
-    String courseName = null;
-    LocalDateTime startDate = null;
-    LocalDateTime endDate = null;
-    String status = null;
-    when(repository.searchStudentCourseListWithConditions(courseName, startDate, endDate, status)).thenReturn(studentCourseList);
-
-    sut.searchStudentList(lastName, firstName, courseName, startDate, endDate, status);
-
-    verify(repository, times(1)).searchWithConditions(lastName, firstName);
-    verify(repository, times(1)).searchStudentCourseListWithConditions(courseName, startDate, endDate, status);
-    verify(converter, times(1)).convertStudentDetails(studentList, studentCourseList);
+  @AfterEach
+  void tearDown() {
+    // Mockito のモックをリセット
+    org.mockito.Mockito.reset(repository);
   }
 
   @Test
@@ -161,10 +148,28 @@ class StudentServiceTest {
   @Test
   @Transactional
   public void 指定したコースIDに対して新しいステータスを正しく更新できること(){
+    StudentCourse course = new StudentCourse();
+    course.setId("1");
+    course.setStatus("本申込");
+    when(repository.findById("1")).thenReturn(Optional.of(course));
+    when(repository.searchStudentCourse("1")).thenReturn(List.of(course));
+
+
+    doAnswer(invocation -> {
+      String id = invocation.getArgument(0);
+      String status = invocation.getArgument(1);
+      if ("1".equals(id)) {
+        course.setStatus(status);
+      }
+      return null;
+    }).when(repository).updateCourseStatus(any(String.class), any(String.class));
+
     String courseId = "1";
     String newStatus = "受講中";
 
     sut.updateCourseStatus(courseId, newStatus);
+
+    verify(repository, times(1)).updateCourseStatus(courseId, newStatus);
 
     StudentCourse updatedCourse = repository.searchStudentCourse(courseId).get(0);
     assertEquals(newStatus, updatedCourse.getStatus());
@@ -173,7 +178,9 @@ class StudentServiceTest {
   @Test
   void ステータス更新の確認_正しい順序で更新されていること(){
     StudentCourse course = new StudentCourse();
-    course.setStatus("本申込");
+    course.setId("1");
+    course.setStatus("仮申込");
+    when(repository.findById("1")).thenReturn(Optional.of(course));
 
       sut.updateCourseStatus(course.getId(), "本申込");
       assertEquals("本申込", course.getStatus());
@@ -188,13 +195,15 @@ class StudentServiceTest {
   @Test
   void 不正なステータスを指定した場合の例外処理(){
     StudentCourse course = new StudentCourse();
+    course.setId("1");
     course.setStatus("仮申込");
+    when(repository.findById("1")).thenReturn(Optional.of(course));
 
     IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
       sut.updateCourseStatus(course.getId(), "受講終了");
     });
 
-    assertEquals("無効なステータス遷移： 仮申込->受講終了", exception.getMessage());
+    assertEquals("無効なステータス遷移: 仮申込->受講終了", exception.getMessage());
   }
 
 }

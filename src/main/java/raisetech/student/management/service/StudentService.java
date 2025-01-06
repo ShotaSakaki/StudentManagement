@@ -121,7 +121,7 @@ public class StudentService {
     } else if (currentStatus.equals("受講中") && newStatus.equals("受講終了")) {
       course.setStatus(newStatus);
     } else {
-      throw new IllegalStateException("無効なステータス遷移：" + currentStatus + "->" + newStatus);
+      throw new IllegalStateException("無効なステータス遷移: " + currentStatus + "->" + newStatus);
     }
 
     repository.updateCourseStatus(courseId, newStatus);
