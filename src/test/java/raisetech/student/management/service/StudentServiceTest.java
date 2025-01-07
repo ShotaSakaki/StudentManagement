@@ -25,6 +25,7 @@ import raisetech.student.management.controller.converter.StudentConverter;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
+import raisetech.student.management.exceptionHandler.InvalidStatusTransitionException;
 import raisetech.student.management.repository.StudentRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -171,7 +172,7 @@ class StudentServiceTest {
 
     verify(repository, times(1)).updateCourseStatus(courseId, newStatus);
 
-    StudentCourse updatedCourse = repository.searchStudentCourse(courseId).get(0);
+    StudentCourse updatedCourse = repository.searchStudentCourse(courseId).getFirst();
     assertEquals(newStatus, updatedCourse.getStatus());
   }
 
@@ -199,7 +200,7 @@ class StudentServiceTest {
     course.setStatus("仮申込");
     when(repository.findById("1")).thenReturn(Optional.of(course));
 
-    IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+    InvalidStatusTransitionException exception = assertThrows(InvalidStatusTransitionException.class, () -> {
       sut.updateCourseStatus(course.getId(), "受講終了");
     });
 

@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -187,10 +188,19 @@ verify(service, times(1)).updateStudent(any());
   }
 
   @Test
-  void コースステータス更新が成功すること() throws Exception{
+  void コースステータス更新が成功すること() throws Exception {
+    String requestBody = """
+        {
+            "status": "本申込"
+        }
+        """;
+
     mockMvc.perform(put("/updateCourseStatus/{courseId}", "123")
-        .param("status", "本申込"))
-        .andExpect(status().isOk()).andExpect(content().string("コースステータスを更新しました"));
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(requestBody))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.message").value("コースステータスを更新しました"));
   }
 
 }

@@ -6,6 +6,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -121,18 +123,35 @@ public class StudentController {
 
   @Operation(summary = "コースステータス更新", description = "受講生のコースステータスを更新します")
   @PutMapping("/updateCourseStatus/{courseId}")
-  public ResponseEntity<String> updateCourseStatus(
+  public ResponseEntity<Map<String, String>> updateCourseStatus(
       @PathVariable String courseId,
-      @RequestParam @NotBlank String status){
+      @RequestBody @Valid StatusUpdateRequest request) {
     try {
-      service.updateCourseStatus(courseId, status);
-      return ResponseEntity.ok("コースステータスを更新しました");
+      service.updateCourseStatus(courseId, request.getStatus());
+      return createResponse(HttpStatus.OK, "message", "コースステータスを更新しました");
     } catch (IllegalStateException e) {
-      return ResponseEntity.badRequest().body("エラー: " + e.getMessage());
+      return createResponse(HttpStatus.BAD_REQUEST, "error", "エラー: " + e.getMessage());
     } catch (NoSuchElementException e) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("エラー: 指定されたコースが見つかりません");
+      return createResponse(HttpStatus.NOT_FOUND, "error", "エラー: 指定されたコースが見つかりません");
+    }
+  }
+
+    public static class StatusUpdateRequest {
+    @NotBlank
+    private String status;
+
+    public String getStatus() {
+      return status;
     }
 
+    public void setStatus(String status) {
+      this.status = status;
+    }
+  }
+
+  private ResponseEntity<Map<String, String>> createResponse(HttpStatus status, String key, String message) {
+    Map<String, String> response = Collections.singletonMap(key, message);
+    return ResponseEntity.status(status).body(response);
   }
 
 }

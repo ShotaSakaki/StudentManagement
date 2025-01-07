@@ -2,12 +2,13 @@ package raisetech.student.management.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import raisetech.student.management.controller.converter.StudentConverter;
 import raisetech.student.management.data.Student;
+import raisetech.student.management.exceptionHandler.CourseNotFoundException;
+import raisetech.student.management.exceptionHandler.InvalidStatusTransitionException;
 import raisetech.student.management.repository.StudentRepository;
 import raisetech.student.management.data.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
@@ -112,7 +113,7 @@ public class StudentService {
    */
   public void updateCourseStatus(String courseId, String newStatus){
     StudentCourse course = repository.findById(courseId)
-        .orElseThrow(() -> new NoSuchElementException("指定されたコースが見つかりません: " + courseId));
+        .orElseThrow(() -> new CourseNotFoundException("指定されたコースが見つかりません: " + courseId));
     String currentStatus = course.getStatus();
     if (currentStatus.equals("仮申込") && newStatus.equals("本申込")) {
       course.setStatus(newStatus);
@@ -121,7 +122,7 @@ public class StudentService {
     } else if (currentStatus.equals("受講中") && newStatus.equals("受講終了")) {
       course.setStatus(newStatus);
     } else {
-      throw new IllegalStateException("無効なステータス遷移: " + currentStatus + "->" + newStatus);
+      throw new InvalidStatusTransitionException("無効なステータス遷移: " + currentStatus + "->" + newStatus);
     }
 
     repository.updateCourseStatus(courseId, newStatus);
