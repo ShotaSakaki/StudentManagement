@@ -1,12 +1,16 @@
 package raisetech.student.management.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mybatis.spring.boot.test.autoconfigure.MybatisTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import raisetech.student.management.data.CourseStatus;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
 
@@ -117,6 +121,13 @@ class StudentRepositoryTest {
   }
 
   @Test
+  public void 条件付きでコースステータスを検索できること(){
+    List<CourseStatus> result = sut.searchCourseStatusListWithConditions("仮申込");
+    assertNotNull(result);
+    assertFalse(result.isEmpty());
+  }
+
+  @Test
   void 新しい受講生コース情報を登録できること(){
     StudentCourse studentCourse = new StudentCourse();
     studentCourse.setStudentId("2");
@@ -129,6 +140,13 @@ class StudentRepositoryTest {
     List<StudentCourse> actual = sut.searchStudentCourseList();
 
     assertThat(actual.size()).isEqualTo(6);
+  }
+
+  @Test
+  public void コースIDで最新のコースステータスを取得できること(){
+    CourseStatus latestStatus = sut.findLatestCourseStatusByCourseId("1");
+    assertNotNull(latestStatus);
+    assertEquals("仮申込", latestStatus.getStatus());
   }
 
   @Test
@@ -156,6 +174,21 @@ class StudentRepositoryTest {
     assertThat(updateCourses.get(0).getCourseName()).isEqualTo("バイナリーオプショントレード");
   }
 
+  @Test
+  public void コースステータスの登録と更新ができること(){
+    CourseStatus courseStatus = new CourseStatus();
+    courseStatus.setStudentCoursesId(String.valueOf(1));
+    courseStatus.setStatus("仮申込");
+
+    sut.registerCourseStatus(courseStatus);
+
+    courseStatus.setStatus("本申込");
+    sut.updateCourseStatus(courseStatus);
+
+    CourseStatus updatedStatus = sut.findLatestCourseStatusByCourseId("1");
+    assertEquals("本申込", updatedStatus.getStatus());
+  }
+
   private Student createStudent(){
     Student student = new Student();
     student.setLastName("新庄");
@@ -163,10 +196,11 @@ class StudentRepositoryTest {
     student.setLastNameFurigana("しんじょう");
     student.setFirstNameFurigana("つよし");
     student.setNickname("BIGBOSS");
-    student.setEmail("北海道");
+    student.setEmail("aaa@gmail.com");
+    student.setPrefecture("北海道");
     student.setAge(52);
     student.setGender("男");
-    student.setRemark("");
+    student.setRemark(null);
     student.setDeleted(false);
     return student;
   }

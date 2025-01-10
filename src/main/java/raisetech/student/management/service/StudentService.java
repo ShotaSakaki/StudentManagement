@@ -2,12 +2,14 @@ package raisetech.student.management.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import raisetech.student.management.controller.converter.StudentConverter;
+import raisetech.student.management.data.CourseStatus;
 import raisetech.student.management.data.Student;
-import raisetech.student.management.exceptionHandler.CourseNotFoundException;
 import raisetech.student.management.exceptionHandler.InvalidStatusTransitionException;
 import raisetech.student.management.repository.StudentRepository;
 import raisetech.student.management.data.StudentCourse;
@@ -43,7 +45,8 @@ public class StudentService {
   public List<StudentDetail> searchStudentList(String lastName, String firstName, String courseName, LocalDateTime startDate, LocalDateTime endDate, String status){
     List<Student> studentList = repository.searchWithConditions(lastName, firstName);
     List<StudentCourse> studentCourseList = repository.searchStudentCourseListWithConditions(courseName, startDate, endDate, status);
-    return converter.convertStudentDetails(studentList, studentCourseList);
+    List<CourseStatus> courseStatusList = repository.searchCourseStatusListWithConditions(status);
+    return converter.convertStudentDetails(studentList, studentCourseList, courseStatusList);
   }
 
   /**
@@ -55,8 +58,17 @@ public class StudentService {
    */
   public StudentDetail searchStudent(String id){
     Student student = repository.searchStudent(id);
-    List<StudentCourse> studentCourses = repository.searchStudentCourse(student.getId());
-    return new StudentDetail(student, studentCourses);
+    List<StudentCourse> studentCourseList = repository.searchStudentCourse(student.getId());
+    List<CourseStatus> courseStatusList = repository.searchCourseStatusByStudentId(student.getId());
+
+    studentCourseList.forEach(studentCourse -> {
+      List<CourseStatus> matchedStatusList = courseStatusList.stream()
+          .filter(status -> studentCourse.getId().equals(String.valueOf(status.getStudentCoursesId())))
+          .collect(Collectors.toList());
+      studentCourse.setCourseStatusList(matchedStatusList);
+    });
+
+    return new StudentDetail(student, studentCourseList);
   }
 
   /**
@@ -70,10 +82,17 @@ public class StudentService {
   public StudentDetail registerStudent(StudentDetail studentDetail){
     Student student = studentDetail.getStudent();
     repository.registerStudent(student);
+
     studentDetail.getStudentCourseList().forEach(studentCourse -> {
       initStudentsCourse(studentCourse, student.getId());
       repository.registerStudentCourse(studentCourse);
+
+      CourseStatus initialStatus = new CourseStatus();
+      initialStatus.setStudentCoursesId(String.valueOf(studentCourse.getId()));
+      initialStatus.setStatus("仮申込");
+      repository.registerCourseStatus(initialStatus);
     });
+
     return studentDetail;
   }
 
@@ -88,7 +107,6 @@ public class StudentService {
     studentCourse.setStudentId(String.valueOf(id));
     studentCourse.setStartDate(now);
     studentCourse.setEndDate(now.plusYears(1));
-    studentCourse.setStatus("仮申込");
   }
 
   /**
@@ -100,7 +118,10 @@ public class StudentService {
   @Transactional
   public void updateStudent(StudentDetail studentDetail){
     repository.updateStudent(studentDetail.getStudent());
-    studentDetail.getStudentCourseList().forEach(repository::updateStudentCourse);
+    studentDetail.getStudentCourseList().forEach(studentCourse -> {
+      repository.updateStudentCourse(studentCourse);
+      studentCourse.getCourseStatusList().forEach(repository::updateCourseStatus);
+    });
   }
 
   /**
@@ -112,20 +133,22 @@ public class StudentService {
    * @param newStatus 更新後のステータス
    */
   public void updateCourseStatus(String courseId, String newStatus){
-    StudentCourse course = repository.findById(courseId)
-        .orElseThrow(() -> new CourseNotFoundException("指定されたコースが見つかりません: " + courseId));
-    String currentStatus = course.getStatus();
+    CourseStatus courseStatus = repository.findLatestCourseStatusByCourseId(courseId);
+    if (courseStatus == null) {
+      throw new NoSuchElementException("指定されたコースステータスが見つかりません:　" + courseId);
+    }
+
+    String currentStatus = courseStatus.getStatus();
     if (currentStatus.equals("仮申込") && newStatus.equals("本申込")) {
-      course.setStatus(newStatus);
+      courseStatus.setStatus(newStatus);
     } else if (currentStatus.equals("本申込") && newStatus.equals("受講中")) {
-      course.setStatus(newStatus);
+      courseStatus.setStatus(newStatus);
     } else if (currentStatus.equals("受講中") && newStatus.equals("受講終了")) {
-      course.setStatus(newStatus);
+      courseStatus.setStatus(newStatus);
     } else {
       throw new InvalidStatusTransitionException("無効なステータス遷移: " + currentStatus + "->" + newStatus);
     }
 
-    repository.updateCourseStatus(courseId, newStatus);
   }
 
 }

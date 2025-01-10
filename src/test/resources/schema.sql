@@ -20,6 +20,12 @@ CREATE TABLE IF NOT EXISTS students_courses
        student_id int NOT NULL,
        course_name VARCHAR(50) NOT NULL,
        start_date TIMESTAMP,
-       end_date TIMESTAMP,
+       end_date TIMESTAMP
+     );
+
+CREATE TABLE IF NOT EXISTS course_status
+     (
+       id int PRIMARY KEY AUTO_INCREMENT,
+       student_courses_id int NOT NULL,
        status enum('仮申込', '本申込', '受講中', '受講終了') DEFAULT '仮申込'
      );

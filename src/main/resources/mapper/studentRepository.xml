@@ -14,7 +14,8 @@
 
   <!-- 条件付きで受講生情報を検索 -->
   <select id = "searchWithConditions" parameterType = "String" resultType = "raisetech.student.management.data.Student">
-    SELECT * FROM students WHERE last_name LIKE CONCAT('%', #{lastName}, '%')
+    SELECT * FROM students WHERE (last_name LIKE CONCAT('%', #{lastName}, '%') OR #{lastName} IS NULL)
+    AND (first_name LIKE CONCAT('%', #{firstName}, '%') OR #{firstName} IS NULL)
   </select>
 
   <!-- 受講生のコース情報の全件検索 -->
@@ -22,15 +23,28 @@
     SELECT * FROM students_courses
   </select>
 
-  <!-- 受講生IDに紐づく受講生コース情報単一検索-->
+  <!-- 受講生IDに紐づく受講生コース情報単一検索 -->
   <select id = "searchStudentCourse" resultType = "raisetech.student.management.data.StudentCourse">
     SELECT * FROM students_courses WHERE student_id = #{studentId}
   </select>
 
+  <!-- 条件付きで受講生コース情報検索 -->
   <select id = "searchStudentCourseListWithConditions" parameterType = "map" resultType = "raisetech.student.management.data.StudentCourse">
     SELECT * FROM students_courses WHERE (course_name LIKE CONCAT('%', #{courseName}, '%') OR #{courseName} IS NULL)
     AND (start_date >= #{startDate} OR #{startDate} IS NULL)
     AND (end_date <![CDATA[<=]]> #{endDate} OR #{endDate} IS NULL)
+  </select>
+
+  <!-- 条件に基づいてCourseStatusを検索 -->
+  <select id = "searchCourseStatusListWithConditions" parameterType = "string" resultType = "raisetech.student.management.data.CourseStatus">
+    SELECT * FROM course_status WHERE status = #{status}
+  </select>
+
+  <!-- 学生IDに基づいてCourseStatusを検索 -->
+  <select id = "searchCourseStatusByStudentId" parameterType = "string" resultType = "raisetech.student.management.data.CourseStatus">
+    SELECT cs. * FROM course_status cs
+    JOIN student_courses sc ON cs.students_courses_id = sc.id
+    WHERE sc.student_id = #{studentId}
   </select>
 
   <!-- 受講生の新規登録 -->
@@ -39,11 +53,23 @@
     VALUES(#{lastName}, #{firstName}, #{lastNameFurigana}, #{firstNameFurigana}, #{nickname}, #{email}, #{prefecture}, #{age}, #{gender}, #{remark}, false)
   </insert>
 
-  <!--受講生のコース情報新規登録  -->
+  <!-- 受講生のコース情報新規登録  -->
   <insert id = "registerStudentCourse" parameterType = "raisetech.student.management.data.StudentCourse" useGeneratedKeys = "true" keyProperty = "id">
-    INSERT INTO students_courses(student_id, course_name, start_date, end_date, status)
-    VALUES(#{studentId}, #{courseName}, #{startDate}, #{endDate}, '仮申込')
+    INSERT INTO students_courses(student_id, course_name, start_date, end_date)
+    VALUES(#{studentId}, #{courseName}, #{startDate}, #{endDate})
   </insert>
+
+  <!-- CourseStatusの登録  -->
+  <insert id = "registerCourseStatus" parameterType = "raisetech.student.management.data.CourseStatus" useGeneratedKeys = "false" keyProperty = "id">
+    INSERT INTO course_status (students_courses_id, status) VALUES (#{studentsCoursesId}, #{status})
+  </insert>
+
+  <!-- コースIDに紐づく最新のCourseStatusを取得  -->
+  <select id="findLatestCourseStatusByCourseId" parameterType="string" resultType="raisetech.StudentManagement.data.CourseStatus">
+    SELECT * FROM course_status　WHERE students_courses_id = #{courseId}
+    ORDER BY id DESC
+    LIMIT 1
+  </select>
 
   <!-- 受講生情報の更新-->
   <update id = "updateStudent" parameterType = "raisetech.student.management.data.Student">
@@ -66,6 +92,12 @@
   <update id = "updateStudentCourse" parameterType = "raisetech.student.management.data.StudentCourse">
     UPDATE students_courses SET
     course_name = #{courseName}
+    WHERE id = #{id}
+  </update>
+
+  <!-- CourseStatusの更新 -->
+  <update id="updateCourseStatus" parameterType="raisetech.StudentManagement.data.CourseStatus">
+    UPDATE course_status SET status = #{status}
     WHERE id = #{id}
   </update>
 
