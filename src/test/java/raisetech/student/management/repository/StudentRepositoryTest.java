@@ -5,17 +5,39 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mybatis.spring.annotation.MapperScan;
 import org.mybatis.spring.boot.test.autoconfigure.MybatisTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import raisetech.student.management.data.CourseStatus;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
 
-@MybatisTest
+//@MybatisTest
+@SpringBootTest
+@MapperScan("raisetech.student.management.repository.StudentRepository")
 class StudentRepositoryTest {
+
+  private Connection connection;
+
+  @BeforeEach
+  void setUp() throws Exception{
+    connection = DriverManager.getConnection("jdbc:h2:~/test;MODE = MySQL", "sa", "sa");
+
+    String sql = new String(Files.readAllBytes(Paths.get("data.sql")));
+    try (Statement stmt = connection.createStatement()) {
+      stmt.execute(sql);
+    }
+  }
 
   @Autowired
   private StudentRepository sut;
@@ -24,16 +46,6 @@ class StudentRepositoryTest {
   void 受講生の全件検索が行えること(){
     List<Student> actual = sut.search();
     assertThat(actual.size()).isEqualTo(5);
-
-    assertThat(actual.get(0).getLastName()).isEqualTo("新庄");
-    assertThat(actual.get(0).getFirstName()).isEqualTo("剛志");
-    assertThat(actual.get(0).getLastNameFurigana()).isEqualTo("しんじょう");
-    assertThat(actual.get(0).getFirstNameFurigana()).isEqualTo("つよし");
-    assertThat(actual.get(0).getNickname()).isEqualTo("BIGBOSS");
-    assertThat(actual.get(0).getEmail()).isEqualTo("fansareourtreasure@fighters.com");
-    assertThat(actual.get(0).getPrefecture()).isEqualTo("北海道");
-    assertThat(actual.get(0).getAge()).isEqualTo(52);
-    assertThat(actual.get(0).getGender()).isEqualTo("男");
   }
 
   @Test

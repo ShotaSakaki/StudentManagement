@@ -40,6 +40,7 @@ public class Student {
 
   @Pattern(regexp = "^(男|女|その他)$", message = "性別は「男」「女」「その他」から選択してください")
   private String gender;
+
   private String remark;
   private boolean isDeleted = false;
 }
