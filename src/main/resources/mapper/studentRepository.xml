@@ -12,11 +12,6 @@
     SELECT * FROM students WHERE id = #{id}
   </select>
 
-  <!-- 条件付きで受講生情報を検索 -->
-  <select id = "searchWithConditions" parameterType = "String" resultType = "raisetech.student.management.data.Student">
-    SELECT * FROM students WHERE last_name LIKE CONCAT('%', #{lastName}, '%')
-  </select>
-
   <!-- 受講生のコース情報の全件検索 -->
   <select id = "searchStudentCourseList" resultType = "raisetech.student.management.data.StudentCourse">
     SELECT * FROM students_courses
@@ -27,11 +22,18 @@
     SELECT * FROM students_courses WHERE student_id = #{studentId}
   </select>
 
+  <!-- 条件付きで受講生情報検索 -->
+  <select id = "searchWithConditions" parameterType = "String" resultType = "raisetech.student.management.data.Student">
+    SELECT * FROM students WHERE (last_name LIKE CONCAT('%', #{lastName}, '%') OR #{lastName} IS NULL)
+    AND (first_name LIKE CONCAT('%', #{firstName}, '%') OR #{firstName} IS NULL)
+  </select>
+
   <!-- 条件付きで受講生コース情報検索 -->
   <select id = "searchStudentCourseListWithConditions" parameterType = "map" resultType = "raisetech.student.management.data.StudentCourse">
     SELECT * FROM students_courses WHERE (course_name LIKE CONCAT('%', #{courseName}, '%') OR #{courseName} IS NULL)
     AND (start_date >= #{startDate} OR #{startDate} IS NULL)
     AND (#{endDate} <![CDATA[<=]]> end_date OR #{endDate} IS NULL)
+    AND (status = #{status} OR #{status} IS NULL)
   </select>
 
   <!-- 受講生の新規登録 -->

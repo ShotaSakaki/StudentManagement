@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import raisetech.student.management.controller.converter.StudentConverter;
 import raisetech.student.management.data.Student;
-import raisetech.student.management.exceptionHandler.CourseNotFoundException;
 import raisetech.student.management.exceptionHandler.InvalidStatusTransitionException;
 import raisetech.student.management.repository.StudentRepository;
 import raisetech.student.management.data.StudentCourse;
@@ -29,18 +28,18 @@ public class StudentService {
   }
 
   /**
-   * 受講生詳細の検索です
-   * 条件が指定されない場合は全件検索を行います
+   * 受講生詳細の検索です。
+   * 条件が指定されない場合は全件検索を行います。
    *
    * @param lastName 受講生の名字
    * @param firstName 受講生の名前
    * @param courseName コース名
    * @param startDate 受講開始日
    * @param endDate 受講終了日
-   * @param status コースのステータス
+   * @param status 受講状況
    * @return 条件に合致した、または全件の受講生一覧
    */
-  public List<StudentDetail> searchStudentList(String lastName, String firstName, String courseName, LocalDateTime startDate, LocalDateTime endDate, String status){
+  public List<StudentDetail> searchStudentList(String lastName, String firstName, String courseName, LocalDateTime startDate, LocalDateTime endDate,  String status){
     List<Student> studentList = repository.searchWithConditions(lastName, firstName);
     List<StudentCourse> studentCourseList = repository.searchStudentCourseListWithConditions(courseName, startDate, endDate, status);
     return converter.convertStudentDetails(studentList, studentCourseList);
@@ -108,12 +107,10 @@ public class StudentService {
    * 新しいステータスに更新します
    * ただし、有効なステータス遷移のみ許可されます
    *
-   *
-   * @param courseId 更新対象のコースID
+   * @param course 更新対象のコースID
    * @param newStatus 更新後のステータス
    */
-  public void updateCourseStatus(String courseId, String newStatus){
-    StudentCourse course = repository.findById(courseId).orElseThrow(() -> new CourseNotFoundException("指定されたコースが見つかりません: " + courseId));
+  public void updateCourseStatus(StudentCourse course, String newStatus){
     String currentStatus = course.getStatus();
 
     if (currentStatus.equals("仮申込") && newStatus.equals("本申込")) {
@@ -125,8 +122,6 @@ public class StudentService {
     } else {
       throw new InvalidStatusTransitionException("無効なステータス遷移: " + currentStatus + "->" + newStatus);
     }
-
-    repository.updateCourseStatus(courseId, newStatus);
 
   }
 

@@ -46,6 +46,7 @@ public interface StudentRepository {
 
   /**
    * 指定された条件に一致する受講生を検索します
+   *
    * @param lastName 受講生の名字(部分一致検索)。 nullの場合、条件に含めません
    * @param firstName 受講生の名前(部分一致検索)。 nullの場合、条件に含めません
    * @return 検索結果に一致する受講生のリスト
@@ -54,6 +55,7 @@ public interface StudentRepository {
 
   /**
    * 指定した条件に一致する受講生コース情報を検索します
+   *
    * @param courseName コース名(部分一致検索)。 nullの場合、条件に含めません
    * @param startDate コース開始日(指定された日付以降)。 nullの場合、条件に含めません
    * @param endDate コース終了日(指定された日付以前)。 nullの場合、条件に含めません

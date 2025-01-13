@@ -6,13 +6,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Map;
-import java.util.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
@@ -119,39 +115,6 @@ public class StudentController {
   public ResponseEntity<String> updateStudent(@RequestBody @Valid StudentDetail studentDetail){
     service.updateStudent(studentDetail);
     return ResponseEntity.ok("更新処理に成功しました");
-  }
-
-  @Operation(summary = "コースステータス更新", description = "受講生のコースステータスを更新します")
-  @PutMapping("/updateCourseStatus/{courseId}")
-  public ResponseEntity<Map<String, String>> updateCourseStatus(
-      @PathVariable String courseId,
-      @RequestBody @Valid StatusUpdateRequest request) {
-    try {
-      service.updateCourseStatus(courseId, request.getStatus());
-      return createResponse(HttpStatus.OK, "message", "コースステータスを更新しました");
-    } catch (IllegalStateException e) {
-      return createResponse(HttpStatus.BAD_REQUEST, "error", "エラー: " + e.getMessage());
-    } catch (NoSuchElementException e) {
-      return createResponse(HttpStatus.NOT_FOUND, "error", "エラー: 指定されたコースが見つかりません");
-    }
-  }
-
-    public static class StatusUpdateRequest {
-    @NotBlank
-    private String status;
-
-    public String getStatus() {
-      return status;
-    }
-
-    public void setStatus(String status) {
-      this.status = status;
-    }
-  }
-
-  private ResponseEntity<Map<String, String>> createResponse(HttpStatus status, String key, String message) {
-    Map<String, String> response = Collections.singletonMap(key, message);
-    return ResponseEntity.status(status).body(response);
   }
 
 }

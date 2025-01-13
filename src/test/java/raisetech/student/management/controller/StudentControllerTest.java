@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,10 +62,8 @@ class StudentControllerTest {
         .andExpect(status().isOk())
         .andExpect(content().json("[]"));
 
-    verify(service, times(1)).searchStudentList(
-        "新庄", "剛志", "TOEIC",
-        LocalDateTime.parse("2024-04-01T00:00:00"), LocalDateTime.parse("2025-03-31T00:00:00"),
-        "仮申込");
+    verify(service, times(1)).searchStudentList("新庄", "剛志", "TOEIC",
+        LocalDateTime.parse("2024-04-01T00:00:00"), LocalDateTime.parse("2025-03-31T00:00:00"), "仮申込");
   }
 
   @Test
@@ -185,22 +182,6 @@ verify(service, times(1)).updateStudent(any());
 
     assertThat(violations.size()).isEqualTo(1);
     assertThat(violations).extracting("message").containsOnly("数字のみを入力するようにしてください");
-  }
-
-  @Test
-  void コースステータス更新が成功すること() throws Exception {
-    String requestBody = """
-        {
-            "status": "本申込"
-        }
-        """;
-
-    mockMvc.perform(put("/updateCourseStatus/{courseId}", "123")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(requestBody))
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.message").value("コースステータスを更新しました"));
   }
 
 }

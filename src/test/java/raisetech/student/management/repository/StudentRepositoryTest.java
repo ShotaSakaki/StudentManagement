@@ -61,6 +61,7 @@ class StudentRepositoryTest {
     assertThat(actual.getGender()).isEqualTo("男");
   }
 
+
   @Test
   void 存在しないIDで受講生を検索するとnullが返されること(){
     Student actual = sut.searchStudent("999");
@@ -113,7 +114,7 @@ class StudentRepositoryTest {
 
     List<StudentCourse> result = sut.searchStudentCourseListWithConditions(courseName, startDate, endDate, status);
 
-    assertThat(result).hasSize(2);
+    assertThat(result).hasSize(1);
     assertThat(result.get(0).getCourseName()).isEqualTo(courseName);
     assertThat(result.get(0).getStartDate()).isEqualTo(startDate);
     assertThat(result.get(0).getEndDate()).isEqualTo(endDate);
