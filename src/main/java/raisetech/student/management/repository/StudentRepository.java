@@ -2,11 +2,11 @@ package raisetech.student.management.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
-import raisetech.student.management.data.CourseStatus;
 
 /**
  * 受講生テーブルと受講生コース情報テーブルと紐づくRepositoryです
@@ -68,22 +68,6 @@ public interface StudentRepository {
   );
 
   /**
-   * 条件に基づいてCourseStatusリストを検索します
-   *
-   * @param status 検索するコースの申込状態
-   * @return 条件に一致するCourseStatusのリスト
-   */
-  List<CourseStatus> searchCourseStatusListWithConditions(@Param("status") String status);
-
-  /**
-   * 受講生IDに基づき、受講生の受講したコースの申込状態を検索します
-   *
-   * @param studentId 受講生ID
-   * @return 受講生IDに基づいて関連するCourseStatusのリスト
-   */
-  List<CourseStatus> searchCourseStatusByStudentId(@Param("studentId") String studentId);
-
-  /**
    * 受講生を新規登録します
    * IDに関しては自動採番を行います
    *
@@ -100,21 +84,6 @@ public interface StudentRepository {
   void registerStudentCourse(StudentCourse studentCourse);
 
   /**
-   * 新しいCourseStatusを登録します
-   *
-   * @param courseStatus コースの申込状態
-   */
-  void registerCourseStatus(CourseStatus courseStatus);
-
-  /**
-   * 指定されたコースIDに基づき、最新のCourseStatusを検索します
-   *
-   * @param courseId コースID
-   * @return 指定されたコースIDに関連する最新のCourseStatus
-   */
-  CourseStatus findLatestCourseStatusByCourseId(@Param("courseId") String courseId);
-
-  /**
    * 受講生を更新します
    *
    * @param student 受講生
@@ -129,10 +98,19 @@ public interface StudentRepository {
   void updateStudentCourse(StudentCourse studentCourse);
 
   /**
-   * 既存のCourseStatusを更新します
+   * 指定されたIDのStudentCourseを取得します
    *
-   * @param courseStatus 既存のCourseStatus。既存のCourseStatusのIDと一致するレコードが更新されます
+   * @param courseId コースID
+   * @return 対象のStudentCourseオブジェクト
    */
-  void updateCourseStatus(CourseStatus courseStatus);
+  Optional<StudentCourse> findById(String courseId);
+
+  /**
+   * コースステータスを更新します
+   *
+   * @param courseId コースID
+   * @param status 更新後のステータス
+   */
+  void updateCourseStatus(String courseId, String status);
 
 }

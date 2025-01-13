@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,5 +22,5 @@ public class StudentCourse {
 
   private LocalDateTime startDate;
   private LocalDateTime endDate;
-  private List<CourseStatus> courseStatusList;
+  private String status;
 }

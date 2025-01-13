@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +22,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.annotation.Transactional;
 import raisetech.student.management.controller.converter.StudentConverter;
-import raisetech.student.management.data.CourseStatus;
 import raisetech.student.management.data.Student;
 import raisetech.student.management.data.StudentCourse;
 import raisetech.student.management.domain.StudentDetail;
@@ -139,66 +140,68 @@ class StudentServiceTest {
     StudentCourse course = new StudentCourse();
     sut.initStudentsCourse(course, "123");
 
-    CourseStatus initialStatus = new CourseStatus();
-    initialStatus.setStudentCoursesId(course.getId());
-    initialStatus.setStatus("仮申込");
-    course.setCourseStatusList(List.of(initialStatus));
-
+    assertEquals("仮申込", course.getStatus());
     assertEquals("123", course.getStudentId());
     assertNotNull(course.getStartDate());
     assertNotNull(course.getEndDate());
-    assertEquals(1, course.getCourseStatusList().size());
-    assertEquals("仮申込", course.getCourseStatusList().get(0).getStatus());
   }
 
   @Test
   @Transactional
   public void 指定したコースIDに対して新しいステータスを正しく更新できること(){
+    StudentCourse course = new StudentCourse();
+    course.setId("1");
+    course.setStatus("本申込");
+    when(repository.findById("1")).thenReturn(Optional.of(course));
+    when(repository.searchStudentCourse("1")).thenReturn(List.of(course));
+
+
+    doAnswer(invocation -> {
+      String id = invocation.getArgument(0);
+      String status = invocation.getArgument(1);
+      if ("1".equals(id)) {
+        course.setStatus(status);
+      }
+      return null;
+    }).when(repository).updateCourseStatus(any(String.class), any(String.class));
+
     String courseId = "1";
     String newStatus = "受講中";
 
-    CourseStatus existingStatus= new CourseStatus();
-    existingStatus.setStudentCoursesId(courseId);
-    existingStatus.setStatus("本申込");
-
-    when(repository.findLatestCourseStatusByCourseId(courseId)).thenReturn(existingStatus);
-
     sut.updateCourseStatus(courseId, newStatus);
 
-    assertEquals(newStatus, existingStatus.getStatus());
-    verify(repository, times(1)).updateCourseStatus(existingStatus);
+    verify(repository, times(1)).updateCourseStatus(courseId, newStatus);
+
+    StudentCourse updatedCourse = repository.searchStudentCourse(courseId).getFirst();
+    assertEquals(newStatus, updatedCourse.getStatus());
   }
 
   @Test
   void ステータス更新の確認_正しい順序で更新されていること(){
-    String courseId = "123";
-    CourseStatus status = new CourseStatus();
-    status.setStudentCoursesId(courseId);
-    status.setStatus("仮申込");
+    StudentCourse course = new StudentCourse();
+    course.setId("1");
+    course.setStatus("仮申込");
+    when(repository.findById("1")).thenReturn(Optional.of(course));
 
-    when(repository.findLatestCourseStatusByCourseId(courseId)).thenReturn(status);
+    sut.updateCourseStatus(course.getId(), "本申込");
+    assertEquals("本申込", course.getStatus());
 
-      sut.updateCourseStatus(courseId, "本申込");
-      assertEquals("本申込", status.getStatus());
+    sut.updateCourseStatus(course.getId(), "受講中");
+    assertEquals("受講中", course.getStatus());
 
-      sut.updateCourseStatus(courseId, "受講中");
-      assertEquals("受講中", status.getStatus());
-
-      sut.updateCourseStatus(courseId, "受講終了");
-      assertEquals("受講終了", status.getStatus());
+    sut.updateCourseStatus(course.getId(), "受講終了");
+    assertEquals("受講終了", course.getStatus());
   }
 
   @Test
   void 不正なステータスを指定した場合の例外処理(){
-    String courseId = "123";
-    CourseStatus status = new CourseStatus();
-    status.setStudentCoursesId(courseId);
-    status.setStatus("仮申込");
-
-    when(repository.findLatestCourseStatusByCourseId(courseId)).thenReturn(status);
+    StudentCourse course = new StudentCourse();
+    course.setId("1");
+    course.setStatus("仮申込");
+    when(repository.findById("1")).thenReturn(Optional.of(course));
 
     InvalidStatusTransitionException exception = assertThrows(InvalidStatusTransitionException.class, () -> {
-      sut.updateCourseStatus(courseId, "受講終了");
+      sut.updateCourseStatus(course.getId(), "受講終了");
     });
 
     assertEquals("無効なステータス遷移: 仮申込->受講終了", exception.getMessage());
