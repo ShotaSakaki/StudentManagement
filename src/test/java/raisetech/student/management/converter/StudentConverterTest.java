@@ -40,7 +40,7 @@ public class StudentConverterTest {
   }
 
   @Test
-  void 受講生のリストと受講生コース情報のリストを渡したときに紐づかない受講生コース情報は除外されること(){
+  void 受講生のリストと受講生コース情報のリストを渡したときに紐づかない受講生コース情報は除外されること() {
     Student student = createStudent();
 
     StudentCourse studentCourse = new StudentCourse();
@@ -56,10 +56,10 @@ public class StudentConverterTest {
     List<StudentDetail> actual = sut.convertStudentDetails(studentList, studentCourseList);
 
     assertThat(actual.getFirst().getStudent()).isEqualTo(student);
-    assertThat(actual.getFirst().getStudentCourseList()).isEmpty();
+    assertThat(actual.getFirst().getStudentCourseList()).isEmpty();;
   }
 
-  private static Student createStudent() {
+  public static Student createStudent(){
     Student student = new Student();
     student.setId("1");
     student.setLastName("新庄");
@@ -71,7 +71,7 @@ public class StudentConverterTest {
     student.setPrefecture("北海道");
     student.setAge(52);
     student.setGender("男");
-    student.setRemark("");
+    student.setRemark(null);
     student.setDeleted(false);
     return student;
   }

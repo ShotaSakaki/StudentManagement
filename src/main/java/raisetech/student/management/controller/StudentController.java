@@ -5,17 +5,19 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.ResponseEntity;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import raisetech.student.management.domain.StudentDetail;
 import raisetech.student.management.exceptionHandler.TestException;
@@ -36,25 +38,34 @@ public class StudentController {
   }
 
   /**
-   * 受講生詳細の一覧検索を行います
-   * 全件検索を行うので、条件指定は行いません
-   *
-   * @return 受講生詳細一覧(全件)
+   * 受講生詳細の一覧検索です
+   * 条件指定ができます。条件が指定されない場合は全件検索を行います
+   * @param lastName 受講生の名字(部分一致検索)
+   * @param firstName 受講生の名前(部分一致検索)
+   * @param courseName コース名(部分一致検索)
+   * @param startDate コース開始日(指定された日付以降)
+   * @param endDate コース終了日(指定された日付以前)
+   * @param status コースのステータス(指定されたステータス)
+   * @return 受講生詳細一覧(条件に一致するもの、または全件)
    */
-  @Operation(tags = "全件検索", summary = "受講生一覧検索", description = "受講生の一覧を検索します",
-      responses = {@ApiResponse(responseCode = "200", description = "受講生の詳細が一覧で出力される")
-      })
+  @Operation(summary = "一覧検索", description = "受講生の一覧を条件付きで検索します",
+      responses = {@ApiResponse(responseCode = "200", description = "条件に一致する受講生の情報、または全受講生の詳細が出力される")
+  })
   @GetMapping("/studentList")
-  public List<StudentDetail> getStudentList() {
-    return service.searchStudentList();
+  public List<StudentDetail> getStudentListWithConditions(
+      @RequestParam(value = "lastName", required = false) String lastName,
+      @RequestParam(value = "firstName", required = false) String firstName,
+      @RequestParam(value = "courseName", required = false) String courseName,
+      @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime startDate,
+      @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime endDate,
+      @RequestParam(value = "status", required = false) String status){
+    return service.searchStudentList(lastName, firstName, courseName, startDate, endDate, status);
   }
 
-  @Operation(tags = "例外処理", summary = "受講生一覧検索(例外処理)", description = "受講生の一覧を検索します(URLが間違っている場合の処理)",
-      responses = {@ApiResponse(responseCode = "200", description = "「全件検索は http://localhost:8080/studentList を使用してください」と表示される")
-      })
+  @Operation(summary = "一覧検索(例外処理)", description = "受講生の一覧検索(エラー)")
   @GetMapping("/studentListException")
   public List<StudentDetail> getStudentListException() throws TestException{
-    throw new TestException("全件検索は http://localhost:8080/studentList を使用してください");
+    throw new TestException("エラーが発生しました");
   }
 
   /**
@@ -62,7 +73,7 @@ public class StudentController {
    * IDに紐づく任意の受講生の情報を取得します
    *
    * @param id 受講生ID
-   * @return 受講生
+   * @return 受講生情報
    */
   @Operation(tags = "検索", summary = "受講生検索", description = "IDに紐づく任意の受講生の情報を取得します",
       responses = {@ApiResponse(responseCode = "200", description = "IDに紐づく任意の受講生の情報が出力される")
@@ -104,11 +115,6 @@ public class StudentController {
   public ResponseEntity<String> updateStudent(@RequestBody @Valid StudentDetail studentDetail){
     service.updateStudent(studentDetail);
     return ResponseEntity.ok("更新処理に成功しました");
-  }
-
-  @ExceptionHandler(TestException.class)
-  public ResponseEntity<String> handleTestException(TestException ex){
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
   }
 
 }

@@ -13,7 +13,6 @@ import raisetech.student.management.domain.StudentDetail;
  */
 @Component
 public class StudentConverter {
-
   /**
    * 受講生に紐づく受講生情報をマッピングします
    * 受講生コース情報は受講生に対して複数存在するので、ループを回して受講生詳細情報を組み立てます
@@ -23,8 +22,9 @@ public class StudentConverter {
    * @return 受講生詳細情報のリスト
    */
   public List<StudentDetail> convertStudentDetails(List<Student> studentList,
-      List<StudentCourse> studentCourseList) {
+      List<StudentCourse> studentCourseList){
     List<StudentDetail> studentDetails = new ArrayList<>();
+
     studentList.forEach(student -> {
       StudentDetail studentDetail = new StudentDetail();
       studentDetail.setStudent(student);
@@ -36,6 +36,7 @@ public class StudentConverter {
       studentDetail.setStudentCourseList(convertStudentCourseList);
       studentDetails.add(studentDetail);
     });
+
     return studentDetails;
   }
 
